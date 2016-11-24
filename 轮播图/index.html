@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <style type="text/css">
+        * {
+            padding: 0;
+            margin: 0;
+            list-style: none;
+            border: 0;
+        }
+
+        .all {
+            width: 500px;
+            height: 200px;
+            padding: 7px;
+            border: 1px solid #ccc;
+            margin: 100px auto;
+            position: relative;
+        }
+
+        .screen {
+            width: 500px;
+            height: 200px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .screen li {
+            width: 500px;
+            height: 200px;
+            overflow: hidden;
+            float: left;
+        }
+
+        .screen ul {
+            position: absolute;
+            left: 0;
+            top: 0px;
+            width: 3000px;
+        }
+
+        .all ol {
+            position: absolute;
+            right: 10px;
+            bottom: 10px;
+            line-height: 20px;
+            text-align: center;
+        }
+
+        .all ol li {
+            float: left;
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            border: 1px solid #ccc;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+
+        .all ol li.current {
+            background: yellow;
+        }
+
+        #arr {
+            display: none;
+        }
+
+        #arr span {
+            width: 40px;
+            height: 40px;
+            position: absolute;
+            left: 5px;
+            top: 50%;
+            margin-top: -20px;
+            background: #000;
+            cursor: pointer;
+            line-height: 40px;
+            text-align: center;
+            font-weight: bold;
+            font-family: '黑体';
+            font-size: 30px;
+            color: #fff;
+            opacity: 0.3;
+            border: 1px solid #fff;
+        }
+
+        #arr #right {
+            right: 5px;
+            left: auto;
+        }
+    </style>
+</head>
+<body>
+<div class="all" id='box'>
+    <div class="screen">
+        <ul>
+            <li><img src="img/1.jpg"/></li>
+            <li><img src="img/2.jpg"/></li>
+            <li><img src="img/3.jpg"/></li>
+            <li><img src="img/4.jpg"/></li>
+            <li><img src="img/5.jpg"/></li>
+        </ul>
+        <ol>
+            <!--这个地方是用来添加小方块-->
+        </ol>
+    </div>
+    <div id="arr">
+    	<span id="left">&lt;</span>
+    	<span id="right">&gt;</span>
+    </div>
+</div>
+<script>
+	//获取所有元素
+	var all=document.querySelector(".all");
+	var screen=all.children[0];
+	var ulist=screen.children[0];
+	var lis=ulist.children;
+	var olist=screen.children[1];
+	
+	var arr=all.children[1];
+	var left=arr.children[0];
+	var right=arr.children[1];
+	
+	var picWid=screen.offsetWidth;
+	var timer=null;
+	var pic=0;
+
+	//动态添加小方块
+	//根据图片的张数添加小方块
+	for(var i=0;i<lis.length;i++){
+		var li=document.createElement("li");
+		li.innerHTML=i+1;
+		olist.appendChild(li);
+	}
+	//给第一个小方块设置样式
+	var olis=olist.children;
+	olis[0].className="current";
+	
+	//当点击小方块时 图片将会移动
+	for(var i=0;i<olis.length;i++){
+		 olis[i].index = i;
+		olis[i].onclick=function(){
+			if(pic==lis.length-1){
+				ulist.style.left=0+"px";
+			}
+			for(var i=0;i<olis.length;i++){
+				olis[i].className="";
+			}
+			this.className="current";
+			var target=-this.index*picWid;
+			animate(ulist,target);
+			//让pic和index同步
+			pic=this.index;
+		}
+	}
+	
+	//当鼠标移动到box上  箭头将会显示出来
+	box.onmouseover=function(){
+		arr.style.display="block";
+	}
+	//当鼠标从box上移出 箭头将会隐藏
+	box.onmouseout=function(){
+		arr.style.display="none";
+	}
+	
+	//点击左右按钮实现无缝滚动
+	//首先应该克隆节点 并将克隆的新节点添加到ulist中
+	var firstpic=lis[0].cloneNode(true);
+	ulist.appendChild(firstpic);
+	
+	right.onclick=play;
+	
+	left.onclick=function(){
+		if(pic==0){
+			ulist.style.left=-(ulist.offsetWidth-picWid);
+			pic=lis.length-1;
+		}
+		pic--;
+		animate(ulist,-pic*picWid);
+		
+		for(var i=0;i<olis.length;i++){
+			olis[i].className="";
+		}
+		olis[pic].className="current";
+	}
+	
+	function play(){
+		if(pic==lis.length-1){
+			ulist.style.left=0+"px";
+			pic=0;
+		}
+		pic++;
+		animate(ulist,-pic*picWid);
+		
+		for(var i=0;i<olis.length;i++){
+			olis[i].className="";
+		}
+		if(pic==lis.length-1){
+			olis[0].className="current";
+		}else{
+			olis[pic].className="current";
+		}
+	}
+	//定义函数animate 用来控制图片的移动
+	function animate(tag,target){
+		clearInterval(tag.timer);
+		tag.timer=setInterval(function(){
+			var leader=tag.offsetLeft;
+			
+			var step=(target-leader)/10;
+			step=target>leader?Math.ceil(step):Math.floor(step);
+			leader=leader+step;
+			tag.style.left=leader+"px";
+			
+			if(leader==target){
+				clearInterval(tag.timer);
+			}
+		},17)
+	}
+</script>
+</body>
+</html>
